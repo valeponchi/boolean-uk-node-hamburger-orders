@@ -15,18 +15,28 @@ function validateOrder(incomingOrder) {
 	// !! return true or false (no need to the last return then)
 	// return !!incomingOrder.filter(singleOrder => {
 
+	let valid = false
+	let error = null
 	//FIND IF THE HAMBURGER EXISTS
 	const filterResult = incomingOrder.filter(singleOrder => {
 		const foundHamburger = hamburgers.find(
 			hamburger => hamburger.id === singleOrder.hamburger_id
 		)
+		error = foundHamburger ? null : "Sorry, can't find that hamburger!"
+
 		// VALIDATE QUANTITY
 		// return foundHamburger.quantity >= singleOrder.quantity
-		return foundHamburger
+		const validQuantity = foundHamburger
 			? foundHamburger.quantity >= singleOrder.quantity
 			: false
+
+		error = validQuantity ? true : "Couldn't fulfill the order"
 	})
-	return filterResult.length === incomingOrder.length
+	valid = filterResult.length === incomingOrder.length
+	return {
+		valid,
+		error,
+	}
 }
 
 // GET
@@ -42,7 +52,9 @@ orderRouter.post('/', (res, res) => {
 	// const newId = orders.length + 1
 	// but if you delete one, there will be duplications
 
-	if (validateOrder(orderFromClient)) {
+	const validateOrderFromClient = validateOrder(orderFromClient)
+
+	if (validateOrderFromClient.valid) {
 		const newOrder = {
 			order_id: newId,
 			items: orderFromClient,
